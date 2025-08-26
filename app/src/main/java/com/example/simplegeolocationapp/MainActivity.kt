@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
@@ -64,6 +65,8 @@ class MainActivity : AppCompatActivity() {
         var btnGetLocation = findViewById<Button>(R.id.btnGetLocation)
 
         btnGetLocation.setOnClickListener{
+            progressBar.visibility = View.VISIBLE
+
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -79,8 +82,47 @@ class MainActivity : AppCompatActivity() {
                 getAreaFromLocation()
             }
         }
-
+        progressBar.visibility=View.VISIBLE
+        /*
+        Sirs button and main thing
+         */
     }
+
+    /*
+    Sirs methods:
+
+
+    private fun checkGPSEnabled(){
+        val locationManager = GetSystemService(LOCATION_SERVICE) as locationManeger
+        if(!locationManager.isProviderEnabled(locationManager.GPS_PROVIDER)){
+        Toast.makeText(this,"Please enable GPS")//more stuff
+        startActivity(Intent(Settings.Action_LOCATION_SOURCE_SETTINGS))
+        }
+    }
+
+    private fun getCurrentLocation(){
+        if(ContextCompact.checkSelfPermission(this, Manifestr.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSIN_GRANTED){
+            ReequestNewLocation()
+        }else{
+            ActivityCompact.requestPermissions(this,arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COURSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun requestNewLocation(){
+
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            1000L).apply{
+                setWaitForAccurateLocation(true)
+                setMinUpdateIntervalMillis(500)
+                setMaxUpdates(1)
+    }.build()
+    }
+     */
+
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun getLastKnownLocation() {
         fusedLocationClient.lastLocation
