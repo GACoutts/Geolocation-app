@@ -1,10 +1,8 @@
 package com.example.simplegeolocationapp
 
 import android.Manifest
-import android.content.ContentProviderClient
 import android.content.pm.PackageManager
 import android.location.Geocoder
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
@@ -15,22 +13,34 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import android.widget.TextView
 import android.widget.Button
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
+import android.widget.ProgressBar
 import androidx.core.app.ActivityCompat
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient:FusedLocationProviderClient
-
     private lateinit var txtvLat: TextView
     private lateinit var txtvLong: TextView
     private lateinit var txtvArea: TextView
+    private lateinit var txtvWeatherToday: TextView
+    private lateinit var txtvWeatherTomorrow: TextView
+    private lateinit var progressBar: ProgressBar
     private var latitude: Double = 0.0
     private  var longitude: Double = 0.0
-
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
+
+    companion object {
+        //sir wants a : private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+    }
+
+    /*
+    The way sir wanted it done:
+    private lateinit var fusedLocationClient:FusedLocationProviderClient
+    private lateinit var locationCallback:LocationCallback
+     //Then it would be declaring the textviews(there is like 5
+     // there is also the progress bar which ill add in my own as well but i imagine it will be here as well
+     */
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +58,9 @@ class MainActivity : AppCompatActivity() {
         txtvLat = findViewById(R.id.txtvLat)
         txtvLong = findViewById(R.id.txtvLong)
         txtvArea = findViewById(R.id.txtvArea)
+        txtvWeatherToday = findViewById(R.id.txtvWeatherToday)
+        txtvWeatherTomorrow = findViewById(R.id.txtvWeatherTomorrow)
+        progressBar = findViewById(R.id.progressBar)
         var btnGetLocation = findViewById<Button>(R.id.btnGetLocation)
 
         btnGetLocation.setOnClickListener{
