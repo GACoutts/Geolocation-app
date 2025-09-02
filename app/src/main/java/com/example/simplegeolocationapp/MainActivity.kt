@@ -1,9 +1,14 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.simplegeolocationapp
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
+import android.view.PixelCopy
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
@@ -15,7 +20,11 @@ import com.google.android.gms.location.LocationServices
 import android.widget.TextView
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.privacysandbox.tools.core.model.Method
+import com.android.volley.toolbox.JsonObjectRequest
+import org.json.JSONObject
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -62,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         txtvWeatherToday = findViewById(R.id.txtvWeatherToday)
         txtvWeatherTomorrow = findViewById(R.id.txtvWeatherTomorrow)
         progressBar = findViewById(R.id.progressBar)
-        var btnGetLocation = findViewById<Button>(R.id.btnGetLocation)
+        val btnGetLocation = findViewById<Button>(R.id.btnGetLocation)
 
         btnGetLocation.setOnClickListener{
             progressBar.visibility = View.VISIBLE
@@ -121,8 +130,47 @@ class MainActivity : AppCompatActivity() {
                 setMaxUpdates(1)
     }.build()
     }
+
+    private fun showLocationDetails(location: Location){
+
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            geocoder.getFromLocation(lat,lon, (Auto added greyed out thing "maxResults")1) { addresses ->
+                if(!addresses.isNullOrEmpty()) {
+                    runOnUiThread {
+                        tvAddress.text = "Address:${addresses[0].getAddressLine((greyed out thing "index")0)}"
+                    }
+                }else {
+                    runOnUiThread{
+                        tvAddress.text = "Address not found"
+                    }
+                }
+                progressBar.visibilty = View.GONE
+            }
+        }else{
+            try{
+                val addresses = geocoder.getFromLocation(lat,lon,(greyed out thing "maxResults")1)
+                tvAdress.text = if(!addresses.isNullOrEmpty()){
+                    "Address:${addresses[0].getAddressLine((greyed out hting "index")0)}"
+                } else {
+                    "Address : Not Found"
+                }
+            } catch (e:Exception){
+                e.printStackTrace()
+                tvAddress.text = "Address:Error retriving"
+            }finally{
+                progressBar.visibility = View.GONE
+            }
+        }else{
+            tvAddress.text = "Address:Geocoder not available"
+            progressBar.visibilty = View.Gone
+        }
+    }
+
+
      */
 
+    @SuppressLint("SetTextI18n")
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun getLastKnownLocation() {
         fusedLocationClient.lastLocation
@@ -140,6 +188,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    @SuppressLint("SetTextI18n")
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
@@ -156,6 +205,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     fun getAreaFromLocation() {
         val geocoder = Geocoder(this, Locale.getDefault())
         try {
@@ -168,6 +218,33 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun fetchweatherForcast(latitude: Double, longitude: Double){
+        val apiKey = "a28e280d385ad5d8379a873d8d135ec2"//put api key here
+        val url = "https://api.openweathermap.org/data/2.5/forecast?lat=$latitude&lon=$longitude&appid=$apiKey"
+        val request = JsonObjectRequest(DownloadManager.Request.Method.GET,url,null,)
+        {response ->
+            try {
+                val list = response.getJSONArray("list")
+                val today = list.getJSONObject(0)
+                val todayTempreture = today.getJSONObject("main").getDouble("temp")
+                val todayDescription = today.getJSONArray("weather").getJSONObject(0).getString("description")
+
+                val tomorrow = list.getJSONObject(8)//24 hours later
+                val tomorrowsTempreture = tomorrow.getJSONObject("main").getDouble("temp")
+                val tomorrowsDescription = tomorrow.getJSONArray("weather").getJSONObject(8).getString("description")
+
+                txtvWeatherToday.text = "Todays weather: $todayTempreture°C and will be like $todayDescription"
+                txtvWeatherTomorrow.text = "Tomorrows weather: $tomorrowsTempreture°C and will be like $tomorrowsDescription"
+
+            }catch (e: Exception){
+                e.printStackTrace()
+                Toast.makeText(this,"Error parsing weather data", Toast.LENGTH_SHORT).show()
+            }
+            progressBar.visibility = View.GONE
+        },
     }
 
 }
